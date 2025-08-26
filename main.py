@@ -18,110 +18,6 @@ RECEIVER_EMAIL = "email"
 
 DELAY = 1
 
-# def checkPage(link):
-#     goodPage = False
-#     with sync_playwright() as p:
-#         browser = p.chromium.launch(headless=True)
-#         page = browser.new_page()
-#         page.goto(link)
-#         page.wait_for_timeout(5000)
-
-#         # Wait for the listings to load (you may need to adjust the selector and wait time)
-#         page.wait_for_selector("h1.x-item-title__mainTitle", timeout=10000)
-
-#         outer_div = page.query_selector("span.ux-timer__text")
-
-#         if outer_div:
-#             # Use text_content() to get all the text, including nested elements
-#             full_text = outer_div.text_content().strip()
-#             timer_text = full_text.replace("Ends in ", "").strip()
-
-#             if (
-#                 ("h" in timer_text and "m" in timer_text)
-#                 or ("m" in timer_text and "s" in timer_text)
-#                 and "d" not in timer_text
-#             ):
-#                 goodPage = True
-#         else:
-#             goodPage = True
-
-#         browser.close()
-
-#         return goodPage
-
-
-# def getListings(url, keywords):
-#     names = []
-#     prices = []
-#     links = []
-#     pageCheck = []
-#     with sync_playwright() as p:
-#         browser = p.chromium.launch(headless=True)
-#         page = browser.new_page()
-#         page.goto(url)
-#         page.wait_for_timeout(10000)
-
-#         # Wait for the listings to load (you may need to adjust the selector and wait time)
-#         page.wait_for_selector("div.s-item__wrapper.clearfix", timeout=10000)
-
-#         # Extract the listing elements
-#         item_container = page.query_selector("div.srp-river-results.clearfix")
-#         listings = item_container.query_selector_all("div.s-item__info.clearfix")
-
-#         good_title = True
-#         i = 0
-#         for listing in listings:
-#             # Extract the listing name
-#             title_element = listing.query_selector("div.s-item__title")
-#             title_text = title_element.inner_text().strip()
-#             if i < 2:
-#                 pageCheck.append(title_text)
-#                 i += 1
-
-#             for keyword in keywords:
-#                 if keyword.lower() not in title_text.lower():
-#                     good_title = False
-
-#             # check if the title includes keywords which seem to slip through the used filter
-#             if (
-#                 "parts" in title_text.lower()
-#                 or "repair" in title_text.lower()
-#                 or "japan" in title_text.lower()
-#                 or "read" in title_text.lower()
-#                 or "issue" in title_text.lower()
-#                 or "flaw" in title_text.lower()
-#             ):
-#                 good_title = False
-
-#             # Extract the listing price
-#             price_element = listing.query_selector("span.s-item__price")
-#             price_span = price_element.query_selector("span.ITALIC")
-
-#             if price_span or "to" in price_element.inner_text().strip()[1:]:
-#                 good_title = False
-
-#             # Extract the href
-#             link_element = listing.query_selector("a.s-item__link")
-#             href = link_element.get_attribute("href")
-
-#             # add function here
-#             if good_title:
-#                 if checkPage(href):
-#                     price_int = float(price_element.inner_text().strip()[1:])
-
-#                     names.append(title_text)
-#                     prices.append(price_int)
-#                     links.append(href)
-
-#             good_title = True
-
-#         browser.close()
-
-#         df = pd.DataFrame({"Name": names, "Price": prices, "Links": links})
-#         return df, pageCheck
-
-# # Filters any pages from text on listing page. Ex. no auctions past 24hrs
-
 
 async def checkPage(link):
     goodPage = False
@@ -196,7 +92,6 @@ async def getListings(url, keywords):
             price_element = await listing.query_selector("span.s-item__price")
             price_span = await price_element.query_selector("span.ITALIC")
 
-            # Fixed this line to await inner_text()
             if price_span or "to" in (await price_element.inner_text()).strip()[1:]:
                 good_title = False
 
@@ -216,69 +111,6 @@ async def getListings(url, keywords):
 
         df = pd.DataFrame({"Name": names, "Price": prices, "Links": links})
         return df, pageCheck
-
-
-# async def getListings(url, keywords):
-#     names = []
-#     prices = []
-#     links = []
-#     pageCheck = []
-#     async with async_playwright() as p:
-#         browser = await p.chromium.launch(headless=True)
-#         page = await browser.new_page()
-#         await page.goto(url)
-#         await page.wait_for_timeout(10000)
-
-#         await page.wait_for_selector("div.s-item__wrapper.clearfix", timeout=10000)
-
-#         item_container = await page.query_selector("div.srp-river-results.clearfix")
-#         listings = await item_container.query_selector_all("div.s-item__info.clearfix")
-
-#         good_title = True
-#         i = 0
-#         for listing in listings:
-#             title_element = await listing.query_selector("div.s-item__title")
-#             title_text = await title_element.inner_text()
-#             if i < 2:
-#                 pageCheck.append(title_text)
-#                 i += 1
-
-#             for keyword in keywords:
-#                 if keyword.lower() not in title_text.lower():
-#                     good_title = False
-
-#             if (
-#                 "parts" in title_text.lower()
-#                 or "repair" in title_text.lower()
-#                 or "japan" in title_text.lower()
-#                 or "read" in title_text.lower()
-#                 or "issue" in title_text.lower()
-#                 or "flaw" in title_text.lower()
-#             ):
-#                 good_title = False
-
-#             price_element = await listing.query_selector("span.s-item__price")
-#             price_span = await price_element.query_selector("span.ITALIC")
-
-#             if price_span or "to" in await price_element.inner_text().strip()[1:]:
-#                 good_title = False
-
-#             link_element = await listing.query_selector("a.s-item__link")
-#             href = await link_element.get_attribute("href")
-
-#             if good_title:
-#                 if await checkPage(href):
-#                     price_int = float((await price_element.inner_text()).strip()[1:])
-#                     names.append(title_text)
-#                     prices.append(price_int)
-#                     links.append(href)
-
-#             good_title = True
-
-#         await browser.close()
-
-#         df = pd.DataFrame({"Name": names, "Price": prices, "Links": links})
-#         return df, pageCheck
 
 
 # Returns the formatted URL with the filters enabled
@@ -302,7 +134,6 @@ async def getAllListings(search, color, price, est_rev, monthly_drops, keywords)
     total_df = pd.DataFrame()
 
     url = getUrl(search, price, i)
-    # Await the call to `getListings`
     df, pageCheck1 = await getListings(url, keywords)
     df["color"] = color
     df["est_rev"] = est_rev
@@ -329,38 +160,6 @@ async def getAllListings(search, color, price, est_rev, monthly_drops, keywords)
 
     total_df = total_df.drop_duplicates()
     return total_df
-
-
-# async def getAllListings(search, color, price, est_rev, monthly_drops, keywords):
-#     i = 1
-#     total_df = pd.DataFrame()
-
-#     url = getUrl(search, price, i)
-#     df, pageCheck1 = await getListings(url, keywords)
-#     df["color"] = color
-#     df["est_rev"] = est_rev
-#     df["monthly_drops"] = monthly_drops
-
-#     total_df = pd.concat([total_df, df], ignore_index=True)
-#     time.sleep(DELAY)
-
-#     while True:
-#         i += 1
-#         url = getUrl(search, price, i)
-#         df, pageCheck2 = getListings(url, keywords)
-#         df["color"] = color
-#         df["est_rev"] = est_rev
-#         df["monthly_drops"] = monthly_drops
-#         time.sleep(DELAY)
-
-#         if pageCheck1[0] == pageCheck2[0] or pageCheck1[1] == pageCheck2[1]:
-#             break
-#         else:
-#             total_df = pd.concat([total_df, df], ignore_index=True)
-#             pageCheck1 = pageCheck2
-
-#     total_df = total_df.drop_duplicates()
-#     return total_df
 
 
 # This checks all the inventory items from the DB and sees what potential listings there are

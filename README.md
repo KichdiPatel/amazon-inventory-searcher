@@ -6,3 +6,5 @@ This is really rough code, but it was very helpful for reducing the monotonous t
 My workflow would be as follows. Every few hours I would run this script to search for new inventory opportunities which would get saved as a excel file and also emailed to me for convenience. 
 
 I had a postgreSQL database, that I was manually updating as I found profitable flips, and this script automated the process of searching for those products on eBay and the individual listings I can resell. The idea was to resell the same type of camera over and over and just keep buying that camera. But, searching the camera model, scrolling through listings, finding profitable listings, etc, was a very repetitive process. 
+
+This script was also configured specifically to my strategy. Ex, only looking for specific profit ranges, only US listings, etc. 
